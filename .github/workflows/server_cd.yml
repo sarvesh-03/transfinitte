@@ -1,0 +1,29 @@
+name: ServerCD
+
+on:
+  push:
+    paths:
+      - server/**
+    branches:
+      - prod
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: deploy
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.DOCKER_SSH_HOST  }}
+        port: 22
+        username: ${{ secrets.DOCKER_SSH_USER  }}
+        key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY  }}
+        script: |
+          cd hack
+          git checkout .
+          git fetch origin
+          git reset --hard origin/main
+          sudo docker-compose up --d --build server
+          sudo docker image prune --filter="dangling=true"
+          
