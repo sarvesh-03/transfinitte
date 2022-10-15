@@ -8,6 +8,7 @@ from src.controllers.directLink.tamilnadu import getTamilNaduDetails
 from src.controllers.directLink.westbengal import getWestBengalDetails
 from src.controllers.directLink.punjab import getPunjabDetails
 from src.controllers.directLink.goa import getGoaDetails
+from src.controllers.directLink.andhra import getAndhraDetails
 def get_direct_links(res):
       """
       Controller for getting direct links
@@ -17,6 +18,10 @@ def get_direct_links(res):
         dist = res[1]
         aconst = res[2]
         pconst = res[3]
+        state = "Andhra Pradesh"
+        dist = "Srikakulam"
+        aconst = "1"
+        pconst = "1"
         if state == "Tamil Nadu":
           getTamilNaduDetails("https://www.elections.tn.gov.in/SSR2022_MR_05012022/",state,dist,aconst,pconst)
         elif state == "West Bengal":
@@ -24,7 +29,9 @@ def get_direct_links(res):
         elif state == "Punjab":
           getPunjabDetails("https://ceopunjab.gov.in/erollpdf2/",state,dist,aconst,pconst)
         elif state == "Goa":
-          getGoaDetails("https://ceogoa.nic.in/erollpdf2/",state,dist,aconst,pconst)
+          getGoaDetails("https://ceogoa.nic.in/PDF/EROLL/MOTHERROLL/2021/",state,dist,aconst,pconst)
+        elif state == "Andhra Pradesh":
+          getAndhraDetails("https://ceoaperolls.ap.gov.in/AP_Eroll_2022/Popuppage",state,dist,aconst,pconst)
         return "OK"
       except GenericError as exception:
         logger.error(f"failed due to {exception}")

@@ -12,7 +12,7 @@ def addZeroes(num):
     else: 
         return num
 def getPunjabDetails(urlFormat,state,dist,acid,psid):
-  acNo="AC"+addZeroes(acid)
+  acNo="A"+addZeroes(acid)
   pcNo = "P"+addZeroes(psid)
   laststring = f"{acNo}{pcNo}"
   p=f"{acNo}/{laststring}.pdf"
