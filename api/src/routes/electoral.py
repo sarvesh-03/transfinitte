@@ -3,14 +3,21 @@ Department Router
 """
 
 from fastapi import APIRouter, Depends, HTTPException
-from api.src.controllers.electoral_bot import get_captcha_bot, get_cred_details
-from api.src.models.electoral import ElectoralRequest
-from api.src.models.errors import GenericError
+from src.controllers.electoral_bot import get_captcha_bot, get_cred_details
+from src.models.electoral import ElectoralRequest
+from src.models.errors import GenericError
 from config.logger import logger
-from main import driver
+
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+
+chrome_options = Options()
+chrome_options.add_experimental_option("detach", True)
+driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=chrome_options)
 
 router = APIRouter(prefix="/electoral")
-
 
 @router.post("/details/")
 async def post_details(
@@ -19,7 +26,7 @@ async def post_details(
 
     try:
         driver.get("https://electoralsearch.in/")
-        return get_captcha_bot(request=request)
+        return get_captcha_bot(request=request,driver=driver)
         
     except GenericError as exception:
         logger.error(f"failed due to {exception}")
@@ -35,7 +42,7 @@ async def post_code(
 ):
 
     try:
-        res_list = get_cred_details(code)
+        res_list = get_cred_details(code,driver=driver)
         return {"response":res_list}
     except GenericError as exception:
         logger.error(f"failed due to {exception}")
