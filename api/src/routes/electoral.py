@@ -15,6 +15,9 @@ from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from src.controllers.directLink.directLink import get_direct_links
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import requests
+import json
+
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
 chrome_options.add_argument('--no-sandbox')
@@ -65,3 +68,33 @@ async def post_code(
             detail=f"An unexpected error occurred while fetching departments:{exception}",
         ) from exception
 
+@router.post("/getDists/")
+async def get_dists(
+    state_code:str
+):
+    try:
+        dists = requests.get(f"https://electoralsearch.in/Home/GetDistList?st_code={state_code}")
+        data = dists.content.decode("utf-8")
+        return data
+    except GenericError as exception:
+        logger.error(f"failed due to {exception}")
+        raise HTTPException(
+            status_code=403,
+            detail=f"An unexpected error occurred while fetching districts:{exception}",
+        ) from exception
+
+@router.post("/getACS/")
+async def get_dists(
+    state_code: str,
+    dist_no: str
+):
+    try:
+        dists = requests.get(f"https://electoralsearch.in/Home/GetAcList?dist_no={dist_no}&st_code={state_code}")
+        data = dists.content.decode("utf-8")
+        return data
+    except GenericError as exception:
+        logger.error(f"failed due to {exception}")
+        raise HTTPException(
+            status_code=403,
+            detail=f"An unexpected error occurred while fetching districts:{exception}",
+        ) from exception

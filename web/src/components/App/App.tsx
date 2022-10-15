@@ -9,6 +9,7 @@ import { NODE_WIDTH, NODE_HEIGHT, SOURCES, DEFAULT_SOURCE } from '../const';
 import axios from 'axios';
 import { getNodeStyle } from './utils';
 import { BACKEND_ORIGIN } from '../../config';
+import { stateCodes } from "./constants"
 
 import css from './App.module.css';
 
@@ -55,13 +56,40 @@ export default React.memo(
       voter_id: "",
   });
 
-  const [captchaImage,setCaptchaImage] = useState("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4 //8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" );
+  const [captchaImage,setCaptchaImage] = useState("");
   const [userCaptcha,setUserCaptcha] = useState();
-  
-  // getting the event handlers from our custom hook
+  const [districts, setDistricts] = useState([{ dist_no: "-1", dist_name: "Select District", ST_CODE: "-1" }])
+  const [acs, setAcs] = useState([
+    {
+      "ac_no": "-1",
+      "ac_name": "Select AC",
+      "ST_CODE": "-1",
+      "DIST_NO": "-1"
+    }
+  ])
+  const [currDist, setCurrDist] = useState("-1")
+  const [currState, setCurrState] = useState("-1")
+  useEffect(()=>{
+    axios.post(`${BACKEND_ORIGIN}/electoral/getDists/?state_code=${currState}`)
+    .then(res => setDistricts(JSON.parse(res.data)))
+  },[currState])
+  useEffect(() => {
+    axios.post(`${BACKEND_ORIGIN}/electoral/getACS/?state_code=${currState}&dist_no=${currDist}`)
+    .then(res => setAcs(JSON.parse(res.data)))
+  },[currDist])
   const onChange = (e: any, field: any) => {
-      console.log(e.target.value);
+    if(field==="state"){
+      //@ts-ignore next-line
+      setCurrState(stateCodes[e.target.value])
       setForm({...form, [field]: e.target.value})
+    }
+    if(field==="district"){
+      const data = e.target.value.split(",")
+      setCurrDist(data[1])
+      console.log(data[1])
+      setForm({...form, [field]: data[0]})
+    }
+    else setForm({...form, [field]: e.target.value})
   }  
   const onChangeCaptcha = (e:any)=>{
     setUserCaptcha(e.target.value)
@@ -158,14 +186,6 @@ export default React.memo(
                   onChange={(e)=>onChange(e, 'fname')}
                   required
                   />
-                <input
-                  name='ac'
-                  id='ac'
-                  type='ac'
-                  placeholder='AC Name'
-                  onChange={(e)=>onChange(e, 'ac')}
-                  required
-                  />
                 <select
                   name='gender'
                   id='gender'
@@ -193,10 +213,20 @@ export default React.memo(
                   onChange={(e)=>onChange(e, 'district')}
                   required
                   >
-                  <option>Select District</option>
-                  <option>Thanjavur</option>
+                  {districts.length > 0 ? districts.map((district) =>
+                  <option key={district.dist_no} value={[district.dist_name, district.dist_no]}>{district.dist_name}</option>)
+                  : <option>Select District</option>}
               </select>
-              
+              <select
+                  name='ac'
+                  id='ac'
+                  onChange={(e)=>onChange(e, 'ac')}
+                  required
+                  >
+                  {acs.length > 0 ? acs.map((ac) =>
+                  <option key={ac.ac_no} value={ac.ac_name}>{ac.ac_name}</option>)
+                : <option>Select AC</option>}
+              </select>
               <button onClick={(e) => onSubmit(e)}>Submit</button>
           </div>
           </form>}
