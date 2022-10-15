@@ -4,11 +4,11 @@ FROM node:18-alpine AS build
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package.json package-lock.json ./
 
 RUN npm i -g svgo
 
-RUN npm install
+RUN npm ci
 
 COPY . /app
 

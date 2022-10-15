@@ -14,19 +14,21 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from src.controllers.directLink.directLink import get_direct_links
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-
+chrome_options.add_argument('--no-sandbox')
+chrome_options.add_argument('--disable-dev-shm-usage')        
 
 router = APIRouter(prefix="/electoral")
 
 @router.on_event("startup")
 async def start_driver():
     global driver
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=chrome_options)
+    driver = webdriver.Remote("http://selenium:4444", DesiredCapabilities.CHROME, options=chrome_options)
     
 @router.on_event("shutdown")
-async def start_driver():
+async def stop_driver():
     driver.quit()
     
 @router.post("/details/")

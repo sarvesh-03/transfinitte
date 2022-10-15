@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+
   client:
     container_name: "client"
     build:
@@ -20,7 +21,9 @@ services:
       - ${SERVER_EXTERNAL_PORT}:8000
     volumes:
       - ./api:/server
-    restart: unless-stopped  
+    restart: unless-stopped
+    depends_on:
+      - selenium  
 
   nginx:
     container_name: "nginx"
@@ -32,3 +35,8 @@ services:
     depends_on:
       - client
       - server
+
+  selenium:
+    image: selenium/standalone-chrome
+    ports:
+    - 4444:4444    
