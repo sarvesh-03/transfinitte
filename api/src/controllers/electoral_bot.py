@@ -83,7 +83,7 @@ def get_cred_details(code:str,driver):
     rows = table.find_elements(By.CSS_SELECTOR,"input")
     size = len(rows)
     print(size)
-    name_set = ["ac_no","part_no"]
+    name_set = ["state","district","ac_no","part_no"]
     num_arr = []
     for row in rows:
         nam = row.get_attribute('name')

@@ -20,27 +20,31 @@ def addZeroes(num):
         return "0"+num
     else: 
         return num
-@router.post("/getDirectLinks")
-async def get_direct_links(request:DirectLinksRequestModal)->DirectLinksResponseModal:
+# @router.post("/getDirectLinks")
+def get_direct_links(res):
       """
       POST route for getting direct links
       """
       try:
-        basepath="/server/src/pdfs"
-        filepath="tn"
+        state=res[0]
+        dist=res[1]
+        aconst=res[2]
+        pconst=res[3]
+        print(os.getcwd())
+        basepath="/home/sarvesh/template/api/src/pdfs"
+        filepath=state
         path=os.path.join(basepath,filepath)
         if not os.path.isdir(path):
           os.mkdir(path)
-        aconst=request.aconst
-        pconst=request.pconst
-        distNo = tamilnaduDistricts.index(f"{request.district}")+1
+        distNo = tamilnaduDistricts.index(f"{dist}")+1
+        print(distNo)
         acNo = "ac"+addZeroes(aconst)
         pcNo = addZeroes(pconst)
         laststring = f"{acNo}{pcNo}"
         url =f"https://www.elections.tn.gov.in/SSR2022_MR_05012022/dt{distNo}/{acNo}/{laststring}.pdf"
+        print("Url" + url)
         res = requests.get(url)
         open(f"{path}/{laststring}.pdf", "wb").write(res.content)
-        return url
       except GenericError as exception:
         logger.error(f"failed due to {exception}")
         raise HTTPException(
