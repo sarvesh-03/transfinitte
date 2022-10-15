@@ -52,6 +52,7 @@ export default React.memo(
       gender:"",
       state: "",
       district:"",
+      voter_id: "",
   });
 
   const [captchaImage,setCaptchaImage] = useState("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4 //8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==" );
@@ -105,7 +106,14 @@ export default React.memo(
                   onChange={(e)=>onChange(e, 'name')}
                   required
                   />
-  
+                  <input
+                  name='voter_id'
+                  id='voter_id'
+                  type='voter_id'
+                  placeholder="Voter ID"
+                  onChange={(e)=>onChange(e, 'voter_id')}
+                  required
+                  />
               <input
                   name='year'
                   id='year'
