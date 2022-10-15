@@ -8,6 +8,8 @@ def download_pdf(url,state, dist,aconst,pconst):
     path=os.path.join(basepath,filepath)
     if not os.path.isdir(path):
       os.mkdir(path)
+    print(url)
     response = requests.get(url)
     fileName = f"{dist}-{aconst}-{pconst}.pdf"
     open(f"{path}/{fileName}", "wb").write(response.content)
+    return f"{path}/{fileName}"

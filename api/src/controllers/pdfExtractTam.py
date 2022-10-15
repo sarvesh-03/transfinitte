@@ -1,3 +1,7 @@
+from tokenize import String
+from typing import List
+from src.models.familytree import UserRelation
+from src.models.relation import Relation
 from pdf2image import convert_from_path
 import pytesseract
 import shutil
@@ -14,6 +18,7 @@ import pandas as pd
 import sys
 import numpy as np
 from tqdm import tqdm
+from src.controllers.electoral_bot import voter_id
 
 from translate import Translator
 translator= Translator(from_lang="tamil",to_lang="english")
@@ -22,6 +27,7 @@ translator= Translator(from_lang="tamil",to_lang="english")
 ###Function to convert PDFs to Images 
 # Input: PDF File name with .pdf and folder relative to current directory
 # Output: Saves images in the folder
+asw=pd.DataFrame(data=None, index=None, columns=None, dtype=None, copy=False)
 def image_pdf(pdf_file, folder, image_list):
   #pdf_file='test'
   images = convert_from_path(pdf_file)
@@ -198,27 +204,7 @@ def get_voter_block_details(row):
   return v_id,v_name,f_or_h,f_h_name,age,gender,slno,house_no
 
 
-sl_no=1
-lista=[]
-image_list = []
-image_pdf('ac1.pdf','./images', image_list)
-print(image_list)
-for page_iter in tqdm(range(len(image_list))):
-    
-    if page_iter==2:
-       block_images=voter_block_crop(image_list[page_iter],True)
-    elif page_iter>2:
-       block_images=voter_block_crop(image_list[page_iter],False)
-    else:
-      continue
-    for block_iter in range(len(block_images)):
-      rows_text=get_voter_block_textrows(block_images[block_iter])
-      if len(rows_text)>2:
-        v_id,v_name,f_or_h,f_h_name,age,gender,slno,house_no=get_voter_block_details(rows_text)
-        #print(v_id)
-        # print( house_no)
-        lista.append([v_id,v_name,f_or_h,f_h_name,age,gender,house_no,sl_no])
-        sl_no+=1
+
 
 def findf_or_h(v_id):
     f_or_h = asw.loc[asw["v_id"] == v_id]["f_or_h"].values[0]
@@ -289,9 +275,40 @@ def getChildren(v_id):
         childrenIDs = asw.loc[(asw["f_h_name"].str.contains(v_name[:-2])) & (asw["f_or_h"] == 'father') & (asw["house_no"] == h_no)]["v_id"].values
         return childrenIDs
 
+
+def getRelatives(v_id,vis_set,response):
+
+  if v_id not in vis_set:
+    vis_set.add(v_id)
+    children=getChildren(v_id)
+    child_relation=[]
+    for id in children:
+      child_relation.append(Relation(id,'blood'))
+      getRelatives(id,vis_set,response)
+    siblings=getSibilings(v_id)
+    siblings_relation=[]
+    for id in siblings:
+      siblings_relation.append(Relation(id,'blood'))
+      getRelatives(id,vis_set,response)
+    parents=getParents(v_id)
+    parents_relation=[]
+    for id in parents:
+      parents_relation.append(Relation(id,'blood'))
+      getRelatives(id,vis_set,response)
+    spouse_relation=[]
+    spouse_relation.append(Relation(findSpouseId(v_id),'married'))
+    res=UserRelation(v_id,getGenderFromDF(v_id),parents_relation,spouse_relation,child_relation,siblings_relation)
+    response.append(res)
+    
+
+    
+      
+
 def getDataFromPdf(path):
     sl_no=1
     lista=[]
+    response = []
+    vis_set=set(String)
     image_list = []
     image_pdf(path,'./images', image_list)
     for page_iter in tqdm(range(len(image_list))):
@@ -312,4 +329,6 @@ def getDataFromPdf(path):
         sl_no+=1
     
     asw=pd.DataFrame(lista,columns=['v_id','v_name','f_or_h','f_h_name','age','gender','house_no','sl_no'])
+    getRelatives(voter_id,vis_set,response,asw)
+    return response
     
