@@ -3,6 +3,7 @@ Department Router
 """
 
 import imp
+from lib2to3.pgen2 import driver
 from fastapi import APIRouter, Depends, HTTPException
 from src.controllers.electoral_bot import get_captcha_bot, get_cred_details
 from src.models.electoral import ElectoralRequest
@@ -15,10 +16,19 @@ from webdriver_manager.chrome import ChromeDriverManager
 from src.controllers.directLink.directLink import get_direct_links
 chrome_options = Options()
 chrome_options.add_experimental_option("detach", True)
-driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=chrome_options)
+
 
 router = APIRouter(prefix="/electoral")
 
+@router.on_event("startup")
+async def start_driver():
+    global driver
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()),chrome_options=chrome_options)
+    
+@router.on_event("shutdown")
+async def start_driver():
+    driver.quit()
+    
 @router.post("/details/")
 async def post_details(
     request:ElectoralRequest
