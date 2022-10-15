@@ -1,8 +1,9 @@
 import requests
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 def download_pdf(url,state, dist,aconst,pconst):
-    basepath="/server/src/pdfs"
+    basepath=os.getenv("base_path")+"api/src/pdfs"
     filepath=state
     path=os.path.join(basepath,filepath)
     if not os.path.isdir(path):

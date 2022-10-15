@@ -20,9 +20,10 @@ from selenium.common.exceptions import StaleElementReferenceException
 #             return self.pattern.search(element_text)
 #         except StaleElementReferenceException:
 #             return False
+voter_id=''
 
 def get_captcha_bot(request:ElectoralRequest,driver) -> bytes:
-
+    voter_id=request.voter_id
     continue_button = driver.find_element("id", "continue")
     continue_button.click()
 

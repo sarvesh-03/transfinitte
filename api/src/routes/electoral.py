@@ -43,6 +43,7 @@ async def post_code(
 
     try:
         res_list = get_cred_details(code,driver=driver)
+        print(res_list)
         get_direct_links(res_list)
         return {"response":res_list}
     except GenericError as exception:

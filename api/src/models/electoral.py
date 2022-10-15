@@ -57,4 +57,9 @@ class ElectoralRequest(BaseModel):
         title="ac",
         description="year students's form response that needs to be downloaded",
     )
+    voter_id: str = Field(
+        ...,
+        title="VoterId",
+        description="year students's form response that needs to be downloaded",
+    )
 
