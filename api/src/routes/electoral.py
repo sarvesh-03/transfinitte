@@ -28,7 +28,7 @@ router = APIRouter(prefix="/electoral")
 @router.on_event("startup")
 async def start_driver():
     global driver
-    driver = webdriver.Remote("http://selenium:4444", DesiredCapabilities.CHROME, options=chrome_options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     
 @router.on_event("shutdown")
 async def stop_driver():
@@ -59,8 +59,8 @@ async def post_code(
     try:
         res_list = get_cred_details(code,driver=driver)
         print(res_list)
-        get_direct_links(res_list)
-        return {"response":res_list}
+       
+        return get_direct_links(res_list)
     except GenericError as exception:
         logger.error(f"failed due to {exception}")
         raise HTTPException(

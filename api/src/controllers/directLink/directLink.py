@@ -17,14 +17,15 @@ def get_direct_links(res):
       Controller for getting direct links
       """
       try:
+        print(res)
         state = res[0]
         dist = res[1]
         aconst = res[2]
         pconst = res[3]
-        state = "Andhra Pradesh"
-        dist = "Srikakulam"
-        aconst = "1"
-        pconst = "1"
+        # state = "Andhra Pradesh"
+        # dist = "Srikakulam"
+        # aconst = "1"
+        # pconst = "1"
         # state="Nagaland"
         # dist = "JALPAIGURI"
         # aconst = "1"
@@ -44,7 +45,7 @@ def get_direct_links(res):
         elif state == "NCT Of Delhi":
           getMDelhiDetails("https://ceodelhi.gov.in/engdata/",state,dist,aconst,pconst)
         elif state == "Nagaland":
-          getNagalandDetails("https://ceo.nagaland.gov.in/Downloads/FinalRoll2022/",state,dist,aconst,pconst)
+          return getNagalandDetails("https://ceo.nagaland.gov.in/Downloads/FinalRoll2022/",state,dist,aconst,pconst)
         return "OK"
       except GenericError as exception:
         logger.error(f"failed due to {exception}")
