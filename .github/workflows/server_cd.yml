@@ -23,7 +23,7 @@ jobs:
           cd hack
           git checkout .
           git fetch origin
-          git reset --hard origin/main
-          sudo docker-compose up --d --build server
+          git reset --hard origin/master
+          sudo docker-compose up --d --build api
           sudo docker image prune --filter="dangling=true"
           

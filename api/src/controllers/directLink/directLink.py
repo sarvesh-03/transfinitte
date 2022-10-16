@@ -17,7 +17,6 @@ def get_direct_links(res):
       Controller for getting direct links
       """
       try:
-        print(res)
         state = res[0]
         dist = res[1]
         aconst = res[2]
