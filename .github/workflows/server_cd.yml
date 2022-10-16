@@ -3,7 +3,7 @@ name: ServerCD
 on:
   push:
     paths:
-      - server/**
+      - api/**
     branches:
       - prod
 
@@ -20,10 +20,10 @@ jobs:
         username: ${{ secrets.DOCKER_SSH_USER  }}
         key: ${{ secrets.DOCKER_SSH_PRIVATE_KEY  }}
         script: |
-          cd hack
+          cd transfinitte
           git checkout .
           git fetch origin
-          git reset --hard origin/main
-          sudo docker-compose up --d --build server
+          git reset --hard origin/master
+          sudo docker-compose up --d --build api
           sudo docker image prune --filter="dangling=true"
           

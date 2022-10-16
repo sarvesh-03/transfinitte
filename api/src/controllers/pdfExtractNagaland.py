@@ -17,7 +17,7 @@ import pandas as pd
 import sys
 import numpy as np
 from tqdm import tqdm
-from src.controllers.electoral_bot import voter_id
+from src.controllers import electoral_bot
 
 asw=pd.DataFrame(data=None, index=None, columns=None, dtype=None, copy=False)
 
@@ -323,6 +323,7 @@ def getRelatives(v_id,vis_set,response):
       
 lista=[]
 def getDataFromPdf(path):
+    print(electoral_bot.voter_id)
     sl_no=1
     
     response = []
@@ -350,11 +351,10 @@ def getDataFromPdf(path):
                 sl_no+=1
             except TypeError:
                 print(rows_text)
-    print(voter_id)
-    vid="GNX0244103"
+    
     global asw
     print(len(lista))
     asw=pd.DataFrame(lista,columns=['v_id','v_name','f_or_h','f_h_name','age','gender','house_no','sl_no'])
     print(asw)
-    getRelatives(vid,vis_set,response)
+    getRelatives(electoral_bot.voter_id,vis_set,response)
     return response
