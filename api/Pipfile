@@ -18,6 +18,10 @@ wget = "*"
 requests = "*"
 selenium = "*"
 webdriver-manager = "*"
+pandas = "*"
+pdf2image = "*"
+pytesseract = "*"
+translate = "*"
 
 [dev-packages]
 
