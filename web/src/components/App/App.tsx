@@ -71,11 +71,21 @@ export default React.memo(
   const [currState, setCurrState] = useState("-1")
   useEffect(()=>{
     axios.post(`${BACKEND_ORIGIN}/electoral/getDists/?state_code=${currState}`)
-    .then(res => setDistricts(JSON.parse(res.data)))
+    .then(res => {
+      const data = JSON.parse(res.data)
+      setDistricts(data)
+      setForm({...form, ['district']: data[0].dist_name})
+      setCurrDist(data[0].dist_no)
+    })
+
   },[currState])
   useEffect(() => {
     axios.post(`${BACKEND_ORIGIN}/electoral/getACS/?state_code=${currState}&dist_no=${currDist}`)
-    .then(res => setAcs(JSON.parse(res.data)))
+    .then(res => {
+      const data = JSON.parse(res.data)
+      setAcs(data)
+      setForm({...form, ['ac']: data[0].ac_name})
+    })
   },[currDist])
   const onChange = (e: any, field: any) => {
     if(field==="state"){
@@ -99,6 +109,7 @@ export default React.memo(
        e.preventDefault()
        axios.post(`${BACKEND_ORIGIN}/electoral/code/?code=${userCaptcha}`)
        .then((res:any) =>{
+        console.log(res)
         setNodes({...nodes,[field]:res.data})
         setIsCaptcha(!IsCaptcha);
        })
