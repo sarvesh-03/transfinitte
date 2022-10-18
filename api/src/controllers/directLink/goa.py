@@ -3,6 +3,7 @@ Goa controller
 """
 
 from src.controllers.downloadPDF import download_pdf
+from src.controllers.pdfExtractNagaland import getDataFromPdf
 def addZeroes(num):
     numLen=len(num)
     if numLen==1:
@@ -18,4 +19,5 @@ def getGoaDetails(urlFormat,state,dist,acid,psid):
   p=f"{acid}/{laststring}.pdf"
   url=urlFormat+p
   print("Url"+ url)
-  download_pdf(url,state,dist,acid,psid)
+  path = download_pdf(url,state,dist,acid,psid)
+  return getDataFromPdf(path)

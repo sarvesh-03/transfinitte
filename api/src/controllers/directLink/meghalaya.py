@@ -3,6 +3,7 @@ Meghalaya controller
 """
 
 from src.controllers.downloadPDF import download_pdf
+from src.controllers.pdfExtractNagaland import getDataFromPdf
 def addZeroes(num):
     numLen=len(num)
     if numLen==1:
@@ -17,4 +18,5 @@ def getMeghalayaDetails(urlFormat,state,dist,acid,psid):
   laststring = f"{acNo}{pcNo}"
   p=f"{acNo}/{laststring}.pdf"
   url=urlFormat+p
-  download_pdf(url,state,dist,acid,psid)
+  path = download_pdf(url,state,dist,acid,psid)
+  return getDataFromPdf(path)

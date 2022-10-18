@@ -3,6 +3,7 @@ Punjab controller
 """
 
 from src.controllers.downloadPDF import download_pdf
+from src.controllers.pdfExtractNagaland import getDataFromPdf
 def addZeroes(num):
     numLen=len(num)
     if numLen==1:

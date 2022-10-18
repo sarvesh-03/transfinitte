@@ -1,5 +1,4 @@
 from tokenize import String
-from typing import List
 from src.models.familytree import UserRelation
 from src.models.relation import Relation
 from pdf2image import convert_from_path
@@ -18,16 +17,14 @@ import pandas as pd
 import sys
 import numpy as np
 from tqdm import tqdm
-from src.controllers.electoral_bot import voter_id
+from src.controllers import electoral_bot
 
-from translate import Translator
-translator= Translator(from_lang="tamil",to_lang="english")
-
+asw=pd.DataFrame(data=None, index=None, columns=None, dtype=None, copy=False)
 
 ###Function to convert PDFs to Images 
 # Input: PDF File name with .pdf and folder relative to current directory
 # Output: Saves images in the folder
-asw=pd.DataFrame(data=None, index=None, columns=None, dtype=None, copy=False)
+
 def image_pdf(pdf_file, folder, image_list):
   #pdf_file='test'
   images = convert_from_path(pdf_file)
@@ -107,81 +104,53 @@ def get_voterid(text_rows):
 #### Gender and Age ####
 
 def get_gender_age(text_rows):
-  global age
-  global gender
-  row = text_rows
-  
-  if (len(row))>0:
-    for row_iter in range(len(row)):
-      if row[row_iter].startswith(('வயது')):
-        gender = row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').split(':')[-1]
-        if gender.__contains__("பெண்‌"):
-             gender = "female"
-        elif gender.__contains__("ஆண்‌"):
-            gender = "male"
-        else:
-            gender = "other"
-        age = row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').split(('பாலினம்'))[0].strip('வயது:')       
-  return age, gender
+    try:
+        row = text_rows
 
+        if (len(row))>0:
+            for row_iter in range(len(row)):
+                if row[row_iter].startswith(('வயது')):
+                    gender = row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').split(':')[-1]
+                    age = row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').split(('பாலினம்'))[0].strip('வயது:')
+        return age, gender
+    except UnboundLocalError:
+        pass
 #### Father/Husband Name ####
 
 def get_f_h_name(text_rows):
-  global f_or_h
-  global f_h_name
-  row = text_rows
-  if (len(row))>0:    
-    for row_iter in range(len(row)):
-      if row[row_iter].startswith(('கணவர்‌','தந்‌ைத','தந்த')):
-        if row[row_iter].startswith(('தந்‌ைத','தந்த')):
-          if not row[row_iter+1].startswith(('வீட்டு')):
-            f_h_name=row[row_iter]+' '+row[row_iter+1].replace('-', '').replace('Available','').replace('is','').replace('Photo','').strip('தந்‌ைத பெயர்‌:')
-            # f_h_name = translator.translate(f_h_name)
-          else:
-            f_h_name=row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').strip('தந்‌ைத பெயர்‌:')
-            # f_h_name = translator.translate(f_h_name)
-          f_or_h='father'
-        elif row[row_iter].startswith(('கணவர்‌')):
-          if not row[row_iter+1].startswith(('வீட்டு')):
-            f_h_name=row[row_iter]+' '+row[row_iter+1].replace('-', '').replace('Available','').replace('is','').replace('Photo','').strip('கணவர்‌ பெயர்‌:')
-            # f_h_name = translator.translate(f_h_name)
-          else:
-            f_h_name=row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').strip('கணவர்‌ பெயர்‌:')
-            # f_h_name = translator.translate(f_h_name)
-
-
-          f_or_h='husband'
-        else:
-          f_or_h=''
-  return f_or_h,f_h_name
+    try:
+        row = text_rows
+        if (len(row))>0:    
+            for row_iter in range(len(row)):
+                if row[row_iter].startswith(('தந்‌ைத','தந்த')):
+                    f_h_name=row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').strip('தந்‌ைத பெயர்‌:')
+                    f_or_h = 'father'
+               
+                elif row[row_iter].startswith(('கணவர்‌')):
+                        f_h_name=row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').strip('கணவர்‌ பெயர்‌:')
+                        f_or_h = 'husband'
+                      
+                elif row[row_iter].startswith("Mother"):
+                        f_or_h = "NaN"
+                        f_h_name = "NaN"
+                        
+        return f_or_h,f_h_name
+    except UnboundLocalError:
+        pass
 
 #### Name ####
 def get_name(text_rows):
-  global name  
-  row = text_rows
-  if (len(row))>0:
-    for row_iter in range(len(row)):
-      if row[row_iter].startswith('பெயர்‌:'):
-        if not row[row_iter+1].startswith(('கணவர்‌','தந்‌ைத','தந்த')):
-          name=row[row_iter]+' '+row[row_iter+1].replace('-', '').strip('பெயர்‌:')
-          # name = translator.translate(name)
-        else:
-          name=row[row_iter].replace('-', '').strip('பெயர்‌:')
-          # name = translator.translate(name)
-  return name
-
-#### House Number ####
-def get_house_no(text_rows):
-    global house_no
-    house_no = -1
+  try:
     row = text_rows
-    if(len(row)) > 0:
+    print(text_rows)
+    if (len(row))>0:
         for row_iter in range(len(row)):
-            if row[row_iter].startswith('வீட்டு'):
-                house_no = row[row_iter].replace('-', '').replace('Available','').replace('is','').replace('Photo','').strip('வீட்டு எண்:').replace(': ',"")
-                print(house_no)
-                
-    return house_no
+            if row[row_iter].startswith('பெயர்‌:'):
+                name=row[row_iter].replace('-', '').strip('பெயர்‌:')
+                return name
+  except UnboundLocalError:
+    pass
+
 
 #### Get Details from Voter Block #####
 
@@ -195,50 +164,83 @@ def get_voter_block_textrows(block_image):
   return row
 
 def get_voter_block_details(row):
-  v_id=get_voterid(row)
-  v_name=get_name(row)
-  f_or_h,f_h_name=get_f_h_name(row)
-  house_no = get_house_no(row)  
-  age, gender = get_gender_age(row)
-  slno=True
-  return v_id,v_name,f_or_h,f_h_name,age,gender,slno,house_no
+    try:
+        v_id=get_voterid(row)
+        v_name=get_name(row)
+        f_or_h,f_h_name=get_f_h_name(row)
+        age, gender = get_gender_age(row)
+        house_no = get_house_no(row)
+        slno=True
+        return v_id,v_name,f_or_h,f_h_name,age,gender,house_no,slno
+    except TypeError:
+        pass
 
-
-
+def get_house_no(text_rows):
+    house_no=0
+    row = text_rows
+    if(len(row)) > 0:
+        for row_iter in range(len(row)):
+            if row[row_iter].startswith('வீட்டு'):
+                house_no = row[row_iter].strip('வீட்டு')
+                house_no = re.sub(r'[^0-9]', "", house_no)
+    return house_no
 
 def findf_or_h(v_id):
-    f_or_h = asw.loc[asw["v_id"] == v_id]["f_or_h"].values[0]
-    return f_or_h
+    try:
+        f_or_h = asw.loc[asw["v_id"] == v_id]["f_or_h"].values[0]
+        return f_or_h
+    except:
+        pass
 
 def findf_or_h_name(v_id):
-    f_or_h_name = asw.loc[asw["v_id"] == v_id]["f_h_name"].values[0]
-    return f_or_h_name
+    try:
+        f_or_h_name = asw.loc[asw["v_id"] == v_id]["f_h_name"].values[0]
+        return f_or_h_name
+    except:
+        pass
 
 def findf_or_h_id(v_id):
-    f_or_h_name = findf_or_h_name(v_id)
-    House_no = getHouseNoFromDF(v_id)
-    f_or_h_id = asw.loc[(asw["v_name"].str.contains(f_or_h_name[:-2])) & (asw["house_no"] == House_no)]["v_id"].values[0]
-    return f_or_h_id
+    try:
+        f_or_h_name = findf_or_h_name(v_id)
+        House_no = getHouseNoFromDF(v_id)
+        f_or_h_id_values = asw.loc[(asw["v_name"] == f_or_h_name) & (asw["house_no"] == House_no)]["v_id"].values
+        if len(f_or_h_id_values) > 0:
+            f_or_h_id = f_or_h_id_values[0]
+            return f_or_h_id
+    except:
+        pass
 
 def getGenderFromDF(v_id):
-    gender = asw.loc[asw["v_id"] == v_id]["gender"].values[0]
-    return gender
+    try:
+        print(v_id)
+        gender = asw.loc[asw["v_id"] == v_id]["gender"].values[0].strip()
+        return gender
+    except:
+        pass    
 
 def getNameFromDF(v_id):
-    name = asw.loc[asw["v_id"] == v_id]["v_name"].values[0]
-    print(name)
-    return name
+    try:
+        name = asw.loc[asw["v_id"] == v_id]["v_name"].values[0]
+        return name
+    except:
+        pass
 
 def getHouseNoFromDF(v_id):
-    House_no = asw.loc[asw["v_id"] == v_id]["house_no"].values[0]
-    return House_no
+    try:
+        House_no = asw.loc[asw["v_id"] == v_id]["house_no"].values[0]
+        return House_no
+    except:
+        pass
 
 def findSpouseId(v_id):
-    v_name = getNameFromDF(v_id).replace("\u200c","").strip()
-    h_no = getHouseNoFromDF(v_id)
-    spouse_id = asw.loc[(asw["f_h_name"].str.contains(v_name[:-2])) &  (asw["f_or_h"] == "husband") & (asw["house_no"] == h_no)]["v_id"].values[0]
+    try:
+        v_name = getNameFromDF(v_id)
+        h_no = getHouseNoFromDF(v_id)
+        spouse_id = asw.loc[(asw["f_h_name"] == v_name) &  (asw["f_or_h"] == "husband") & (asw["house_no"] == h_no)]["v_id"].values[0]
                                                                           
-    return spouse_id
+        return spouse_id
+    except:
+        pass
 
 def getParents(v_id):
     f_or_h = findf_or_h(v_id)
@@ -248,7 +250,7 @@ def getParents(v_id):
         mother_id = findSpouseId(father_id)
         return father_id, mother_id
     else:
-        return "Not possible with given data"
+        pass
     
 
 def getSpouseParents(v_id):
@@ -256,61 +258,77 @@ def getSpouseParents(v_id):
     if f_or_h == "husband":
         husband_id = findf_or_h_id(v_id)
         SpouseFatherId, SpouseMotherId = getParents(husband_id)
-    return SpouseFatherId, SpouseMotherId
+        return SpouseFatherId, SpouseMotherId
 
 def getSibilings(v_id):
-    f_or_h = findf_or_h(v_id)
-    if f_or_h == "father":
-        father_name = findf_or_h_name(v_id)
-        h_no = getHouseNoFromDF(v_id)
-        IDs = asw.loc[(asw["f_h_name"].str.contains(father_name[:-2])) & (asw["f_or_h"] == "father") & (asw["house_no"] == h_no)]["v_id"].values
-        sibilingsIDs = np.delete(IDs, np.where(IDs == v_id))
-        return sibilingsIDs
-    
+    try:
+        f_or_h = findf_or_h(v_id)
+        if f_or_h == "father":
+            father_name = findf_or_h_name(v_id)
+            h_no = getHouseNoFromDF(v_id)
+            IDs = asw.loc[(asw["f_h_name"].str.contains(father_name[:-2])) & (asw["f_or_h"] == "father") & (asw["house_no"] == h_no)]["v_id"].values
+            sibilingsIDs = np.delete(IDs, np.where(IDs == v_id))
+            return sibilingsIDs
+    except:
+        pass
 def getChildren(v_id):
-    v_gender = getGenderFromDF(v_id)
-    if v_gender == "male":
-        v_name = getNameFromDF(v_id).replace("\u200c","").strip()
-        h_no = getHouseNoFromDF(v_id)
-        childrenIDs = asw.loc[(asw["f_h_name"].str.contains(v_name[:-2])) & (asw["f_or_h"] == 'father') & (asw["house_no"] == h_no)]["v_id"].values
-        return childrenIDs
-
+    try:
+        v_gender = getGenderFromDF(v_id)
+        if v_gender == "MALE":
+            v_name = getNameFromDF(v_id).strip()
+            h_no = getHouseNoFromDF(v_id)
+            childrenIDs = asw.loc[(asw["f_h_name"] == v_name) & (asw["f_or_h"] == 'father') & (asw["house_no"] == h_no)]["v_id"].values
+            return childrenIDs
+    except:
+        pass
 
 def getRelatives(v_id,vis_set,response):
 
   if v_id not in vis_set:
     vis_set.add(v_id)
     children=getChildren(v_id)
+    print(children)
     child_relation=[]
-    for id in children:
-      child_relation.append(Relation(id,'blood'))
-      getRelatives(id,vis_set,response)
+    if children is not None:
+        for id in children:
+            child_relation.append(Relation(id=id,type='blood'))
+            getRelatives(id,vis_set,response)
     siblings=getSibilings(v_id)
     siblings_relation=[]
-    for id in siblings:
-      siblings_relation.append(Relation(id,'blood'))
-      getRelatives(id,vis_set,response)
+    print(siblings)
+    if siblings is not None:
+        for id in siblings:
+            siblings_relation.append(Relation(id=id,type='blood'))
+            getRelatives(id,vis_set,response)
     parents=getParents(v_id)
     parents_relation=[]
-    for id in parents:
-      parents_relation.append(Relation(id,'blood'))
-      getRelatives(id,vis_set,response)
+    print(parents)
+    if parents is not None:
+        for id in parents:
+            parents_relation.append(Relation(id=id,type='blood'))
+            getRelatives(id,vis_set,response)
     spouse_relation=[]
-    spouse_relation.append(Relation(findSpouseId(v_id),'married'))
-    res=UserRelation(v_id,getGenderFromDF(v_id),parents_relation,spouse_relation,child_relation,siblings_relation)
-    response.append(res)
+    sp_id=findSpouseId(v_id)
+    if sp_id is not None:
+        spouse_relation.append(Relation(id=sp_id,type='married'))
+    gen=getGenderFromDF(v_id)
+    if gen is not None:    
+        res=UserRelation(id=v_id,gender=gen,parents=parents_relation,spouses=spouse_relation,children=child_relation,siblings=siblings_relation)
+        response.append(res)
     
 
     
       
-
+lista=[]
 def getDataFromPdf(path):
+    print(electoral_bot.voter_id)
     sl_no=1
-    lista=[]
+    
     response = []
     vis_set=set(String)
     image_list = []
-    image_pdf(path,'./images', image_list)
+    image_pdf(path,'./imagesNagaland', image_list)
+    image_list = image_list[:23]
     for page_iter in tqdm(range(len(image_list))):
     
         if page_iter==2:
@@ -319,16 +337,22 @@ def getDataFromPdf(path):
             block_images=voter_block_crop(image_list[page_iter],False)
         else:
             continue
-    for block_iter in range(len(block_images)):
-      rows_text=get_voter_block_textrows(block_images[block_iter])
-      if len(rows_text)>2:
-        v_id,v_name,f_or_h,f_h_name,age,gender,slno,house_no=get_voter_block_details(rows_text)
-        #print(v_id)
-        # print( house_no)
-        lista.append([v_id,v_name,f_or_h,f_h_name,age,gender,house_no,sl_no])
-        sl_no+=1
+        for block_iter in range(len(block_images)):
+            rows_text=get_voter_block_textrows(block_images[block_iter])
+            try:
+            
+                if len(rows_text)>2:
+                    v_id,v_name,f_or_h,f_h_name,age,gender,slno,house_no=get_voter_block_details(rows_text)
+            #print(v_id)
+            # print( house_no)
+                lista.append([v_id,v_name,f_or_h,f_h_name,age,gender,house_no,sl_no])
+                sl_no+=1
+            except TypeError:
+                print(rows_text)
     
+    global asw
+    print(len(lista))
     asw=pd.DataFrame(lista,columns=['v_id','v_name','f_or_h','f_h_name','age','gender','house_no','sl_no'])
-    getRelatives(voter_id,vis_set,response,asw)
+    print(asw)
+    getRelatives(electoral_bot.voter_id,vis_set,response)
     return response
-    
