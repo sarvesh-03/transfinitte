@@ -66,5 +66,6 @@ Note: We had another approach where we can locally host the pdfs after downloadi
   npm install
 
 ## Live Depoloyment:
+- We preffered using Swagger Docs over Postman API is it provides a more intuitive interface to view and interact with our API. The link for the API's Swagger Docs is given below
 
-    http://hacksparrow.muhesh.studio:3000/
+<code>http://hacksparrow.muhesh.studio:8000/docs</code>
