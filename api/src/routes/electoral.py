@@ -28,7 +28,7 @@ router = APIRouter(prefix="/electoral")
 @router.on_event("startup")
 async def start_driver():
     global driver
-    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
+    driver = webdriver.Remote(command_executor='http://selenium:4444', options=chrome_options)
     
 @router.on_event("shutdown")
 async def stop_driver():
