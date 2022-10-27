@@ -67,6 +67,7 @@ Note: We had another approach where we can locally host the pdfs after downloadi
 
 ## Live Depoloyment:
 - We preffered using Swagger Docs over Postman API is it provides a more intuitive interface to view and interact with our API. The link for the API's Swagger Docs is given below
+- Each endpoint may take upto 5 mins to return a result as this is a very compute intensive process, please be patient for the results :)
 
 <code>http://hacksparrow.muhesh.studio:8000/docs</code>
 
