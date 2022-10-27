@@ -69,3 +69,19 @@ Note: We had another approach where we can locally host the pdfs after downloadi
 - We preffered using Swagger Docs over Postman API is it provides a more intuitive interface to view and interact with our API. The link for the API's Swagger Docs is given below
 
 <code>http://hacksparrow.muhesh.studio:8000/docs</code>
+
+#### Sample Input for /details route
+```
+{
+  "name": "KIHETO",
+  "fname": "SALUVI ",
+  "year": "1970",
+  "month": "Jan",
+  "day": "9",
+  "gender": "पुरुष/Male",
+  "state": "Nagaland",
+  "district": "PUGHOBOTO",
+  "ac": "PUGHOBOTO",
+  "voter_id": "GNX0244103"
+}
+```
